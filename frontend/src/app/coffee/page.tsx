@@ -53,27 +53,25 @@ function formatDate(value: string | null): string {
 }
 
 function getDisplayName(coffeeBean: CoffeeBean): string {
-  return coffeeBean.name || coffeeBean.name_ja || "名称未設定";
+  return coffeeBean.name || coffeeBean.name_ja || "コーヒー名未設定";
 }
 
 export default function CoffeePage() {
   const [coffeeBeans, setCoffeeBeans] = useState<CoffeeBean[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(
+    API_BASE_URL ? null : "NEXT_PUBLIC_API_BASE_URL が設定されていません。"
+  );
+  const [loading, setLoading] = useState(Boolean(API_BASE_URL));
   const searchParams = useSearchParams();
   const isProcessing = searchParams.get("processing") === "true";
 
   useEffect(() => {
-    if (!API_BASE_URL) {
-      setError("NEXT_PUBLIC_API_BASE_URL が設定されていません。");
-      setLoading(false);
-      return;
-    }
+    if (!API_BASE_URL) return;
 
     apiFetch(`${API_BASE_URL}/coffee_beans`)
       .then((res) => {
         if (!res.ok) {
-          setError("コーヒー豆の取得に失敗しました。");
+          setError("コーヒー一覧の取得に失敗しました。");
           return null;
         }
         return res.json() as Promise<CoffeeBean[]>;
@@ -91,7 +89,7 @@ export default function CoffeePage() {
         <header className="flex flex-col gap-4 border-b border-stone-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-sm font-medium text-amber-700">Coffee Records</p>
-            <h1 className="mt-1 text-3xl font-semibold">コーヒー豆一覧</h1>
+            <h1 className="mt-1 text-3xl font-semibold">コーヒー一覧</h1>
           </div>
           <Link
             href="/coffee/new"
@@ -103,7 +101,7 @@ export default function CoffeePage() {
 
         {isProcessing ? (
           <section className="rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-            OCR処理が完了すると一覧に表示されます。表示されない場合はリロードしてください。
+            OCR 解析が進行中です。一覧に表示されない場合はページを再読み込みしてください。
           </section>
         ) : null}
 
@@ -121,9 +119,9 @@ export default function CoffeePage() {
 
         {!loading && !error && coffeeBeans.length === 0 ? (
           <section className="rounded-md border border-dashed border-stone-300 bg-white p-8 text-center">
-            <h2 className="text-lg font-semibold">登録済みの豆はありません</h2>
+            <h2 className="text-lg font-semibold">登録済みの豆はまだありません</h2>
             <p className="mt-2 text-sm text-gray-600">
-              画像アップロードと確認画面で保存したコーヒー豆がここに表示されます。
+              画像をアップロードして解析すると、ここにコーヒー豆の記録が表示されます。
             </p>
             <Link
               href="/coffee/new"
@@ -136,7 +134,7 @@ export default function CoffeePage() {
 
         {coffeeBeans.length > 0 ? (
           <section
-            aria-label="コーヒー豆一覧"
+            aria-label="コーヒー一覧"
             className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3"
           >
             {coffeeBeans.map((coffeeBean) => {

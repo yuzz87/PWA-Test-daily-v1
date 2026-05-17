@@ -72,15 +72,13 @@ function formatValue(value: unknown): string {
 
 export default function CoffeeDetailClient({ id }: { id: string }) {
   const [coffeeBean, setCoffeeBean] = useState<CoffeeBean | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(
+    API_BASE_URL ? null : "NEXT_PUBLIC_API_BASE_URL が設定されていません。"
+  );
+  const [loading, setLoading] = useState(Boolean(API_BASE_URL));
 
   useEffect(() => {
-    if (!API_BASE_URL) {
-      setError("NEXT_PUBLIC_API_BASE_URL が設定されていません。");
-      setLoading(false);
-      return;
-    }
+    if (!API_BASE_URL) return;
 
     const controller = new AbortController();
 
@@ -114,10 +112,10 @@ export default function CoffeeDetailClient({ id }: { id: string }) {
               href="/coffee"
               className="text-sm font-medium text-amber-800 transition hover:text-amber-950"
             >
-              コーヒー豆一覧へ戻る
+              コーヒー一覧へ戻る
             </Link>
             <h1 className="mt-4 text-3xl font-semibold">
-              {coffeeBean?.name || coffeeBean?.name_ja || "コーヒー豆詳細"}
+              {coffeeBean?.name || coffeeBean?.name_ja || "コーヒー豆の詳細"}
             </h1>
             {coffeeBean?.name_ja ? (
               <p className="mt-2 text-sm text-gray-600">{coffeeBean.name_ja}</p>
@@ -158,7 +156,7 @@ export default function CoffeeDetailClient({ id }: { id: string }) {
                   <div className="mt-4 overflow-hidden rounded-md border border-stone-200 bg-stone-100">
                     <Image
                       src={imageUrl}
-                      alt="アップロード済みコーヒーパッケージ画像"
+                      alt="アップロードされたコーヒーパッケージ画像"
                       width={720}
                       height={960}
                       className="h-auto max-h-[70vh] w-full object-contain"
