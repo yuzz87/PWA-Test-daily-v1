@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - feature/testV5/pages
+      - feature/test
 
 permissions:
   contents: read
